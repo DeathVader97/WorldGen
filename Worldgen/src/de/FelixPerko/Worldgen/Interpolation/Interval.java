@@ -1,7 +1,8 @@
 package de.FelixPerko.Worldgen.Interpolation;
 
 public abstract class Interval {
-	double min, max;
+	public double min;
+	double max;
 	
 	public Interval(double min, double max){
 		this.min = min;

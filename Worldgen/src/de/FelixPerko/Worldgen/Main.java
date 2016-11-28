@@ -84,7 +84,7 @@ public class Main extends JavaPlugin{
 	}
 
 	private static void calcImage(BufferedImage img, int size, double z) {
-		double zoomFactor = 0.75;
+		double zoomFactor = 2;
 		for (int x = 0 ; x < size ; x++){
 			for (int y = 0 ; y < size ; y++){
 				float f = (float)NoiseHelper.simplexNoise2D(x, y, 0.003*zoomFactor, 0.5, 2, (int)z);

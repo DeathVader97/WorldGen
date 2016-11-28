@@ -1,5 +1,7 @@
 package de.FelixPerko.Worldgen.Noise;
 
+import java.util.HashMap;
+
 public class NoiseHelper {
 
 	public static OpenSimplexNoise openSimplexNoise = new OpenSimplexNoise();
@@ -16,6 +18,19 @@ public class NoiseHelper {
 		}
 		return value/maxAmp;
 	}
+	
+//	final static int maxDefaultSelectorSteps = 16;
+//	static HashMap<Double, double[]> map = new HashMap<>();
+//	static double[] defaultMap = new double[maxDefaultSelectorSteps];
+//	static {
+//		double v = 1;
+//		for (int i = 0 ; i < maxDefaultSelectorSteps ; i++){
+//			defaultMap[i] = v;
+//			v += v*0.5;
+//			System.out.println(i+": "+defaultMap[i]);
+//		}
+//	}
+	
 	
 	public static boolean simplexNoise2DSelector(double x, double y, double frequency, double persistance, double lacunarity, int octaves, OpenSimplexNoise noise, double border, boolean lower, boolean higher){
 		double amplitude = 1;
