@@ -14,7 +14,22 @@ import de.FelixPerko.Worldgen.Noise.OpenSimplexNoise;
 public class Main {
 	
 	public static void main(String[] args) {
-		displayImage();
+		long t1 = System.nanoTime();
+		for (int i = 0 ; i < 100000000 ; i++){
+			if (i == 10)
+				i = 11;
+			else
+				i = i*1;
+		}
+		long t2 = System.nanoTime();
+
+		for (int i = 0 ; i < 100000000 ; i++){
+			i = (i == 10) ? 11 : i*1;
+		}
+		long t3 = System.nanoTime();
+		System.out.println(t3-t2);
+		System.out.println(t2-t1);
+//		displayImage();
 	}
 
 	private static void displayImage() {
@@ -60,7 +75,7 @@ public class Main {
 	}
 
 	private static void calcImage(BufferedImage img, int size, double z) {
-		double zoomFactor = 1;
+		double zoomFactor = 2;
 		for (int x = 0 ; x < size ; x++){
 			for (int y = 0 ; y < size ; y++){
 				float f = (float)NoiseHelper.simplexNoise2D(x, y, 0.003*zoomFactor, 0.5, 2, (int)z);

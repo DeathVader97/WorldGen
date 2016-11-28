@@ -3,6 +3,8 @@ package de.FelixPerko.Worldgen;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import de.FelixPerko.Worldgen.Functions.Function;
+
 public class Modifier {
 	
 	ArrayList<Interval> intervals = new ArrayList<>();
@@ -25,6 +27,12 @@ public class Modifier {
 	public Modifier addConst(double min, double max, double v){
 		intervals.add(new ConstantInterpolationInterval(min, max, v));
 		update(min, max);
+		return this;
+	}
+	
+	public Modifier addFunc(double min, double max, Function f){
+		intervals.add(new FunctionInterpolationInterval(min, max, f));
+		update(min,max);
 		return this;
 	}
 	
