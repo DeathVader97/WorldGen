@@ -1,4 +1,4 @@
-package de.FelixPerko.Worldgen;
+package de.FelixPerko.Worldgen.Interpolation;
 
 public abstract class Interval {
 	double min, max;

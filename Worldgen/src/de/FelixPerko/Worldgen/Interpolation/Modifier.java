@@ -1,4 +1,4 @@
-package de.FelixPerko.Worldgen;
+package de.FelixPerko.Worldgen.Interpolation;
 
 import java.util.ArrayList;
 import java.util.Comparator;
