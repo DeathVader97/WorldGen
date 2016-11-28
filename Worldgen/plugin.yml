@@ -1,0 +1,4 @@
+name: Worldgen
+version: 0.1
+main:  de.FelixPerko.Worldgen.Main
+commands:
