@@ -22,19 +22,20 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	public static Modifier isleHeightModifier = new Modifier(1);
 	
 	static {
-		heightModifier.addCos(0, 0.175, 32, 64);
-		heightModifier.addCos(0.175, 1, 64, 100);
+		heightModifier.addCos(0, 0.23, 32, 70);
+		heightModifier.addCos(0.23, 1, 70, 100);
 
-		onIsleLineModifier.addConst(0, 0.08, 1);
-		onIsleLineModifier.addCos(0.08, 0.12, 1, 0);
+		onIsleLineModifier.addConst(0, 0.1, 1);
+		onIsleLineModifier.addCos(0.1, 0.15, 1, 0);
 		
-		isleLineModifier.addCos(0, 0.5, 0, 0.4);
-		isleLineModifier.addCos(0.5, 1, 0.4, 0.3);
+		isleLineModifier.addCos(0.1, 0.5, 0, 0.5);
+		isleLineModifier.addConst(0.5, 1, 0.5);
 		
-		isleGeneralModifier.addCos(0, 0.5, 0, 0.15);
-		isleGeneralModifier.addCos(0.5, 1, 0.15, 0.1);
+		isleGeneralModifier.addCos(0.3, 0.5, 0, 0.25);
+		isleGeneralModifier.addConst(0.5, 1, 0.25);
 		
-		isleHeightModifier.addCos(0.125, 0.175, 1, 0);
+		isleHeightModifier.addCos(0.1, 0.175, 1, 0);
+		isleHeightModifier.addConst(0.175, 1, 0);
 		
 	}
 	
@@ -44,7 +45,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 		result[0] = new byte[4096];
 		int xOffset = chunkX*16;
 		int zOffset = chunkZ*16;
-		double zoomFactor = 0.0625;
+		double zoomFactor = 0.05;
 		for (int x = xOffset ; x < xOffset+16 ; x++){
 			for (int z = zOffset ; z < zOffset+16 ; z++){
 				float value = (float)NoiseHelper.simplexNoise2D(x, z, 0.003*zoomFactor, 0.5, 2, 8);
@@ -52,9 +53,10 @@ public class CustomChunkGenerator extends ChunkGenerator{
 					value = -value;
 				
 				if (value < 0.175){
-					float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.075*zoomFactor, 0.5, 2, 3));
-					double isleLineValue = onIsleLineModifier.modify(Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.01*zoomFactor, 0.5, 2, 1)));
-					value += isleNoise*(isleLineModifier.modify(isleNoise)*isleLineValue+isleGeneralModifier.modify(isleNoise)*(1-isleLineValue));
+					float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.05*zoomFactor, 0.5, 2, 6));
+					double isleLineValue = CustomChunkGenerator.onIsleLineModifier.modify(Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.01*zoomFactor, 0.5, 2, 1)));
+					double multValue = (CustomChunkGenerator.isleLineModifier.modify(isleNoise)*isleLineValue+CustomChunkGenerator.isleGeneralModifier.modify(isleNoise)*(1-isleLineValue));
+					value += 0.4*multValue*CustomChunkGenerator.isleHeightModifier.modify(value);
 //					if (onIsleLine){
 //						if (isleNoise > 0.4)
 //							value += isleNoise/3;

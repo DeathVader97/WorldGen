@@ -84,9 +84,9 @@ public class Main extends JavaPlugin{
 	}
 
 	private static void calcImage(BufferedImage img, int size, double z) {
-		double zoomFactor = 2;
-		for (int x = 0 ; x < size ; x++){
-			for (int y = 0 ; y < size ; y++){
+		double zoomFactor = 4;
+		for (int x = -size/2 ; x < size/2 ; x++){
+			for (int y = -size/2 ; y < size/2 ; y++){
 				float f = (float)NoiseHelper.simplexNoise2D(x, y, 0.003*zoomFactor, 0.5, 2, (int)z);
 				if (f < 0)
 					f = -f;
@@ -98,29 +98,29 @@ public class Main extends JavaPlugin{
 //				else
 //					f = 0;
 				
-				if (f < 0.175){
-					float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, y, 0.075*zoomFactor, 0.5, 2, 3));
-					double isleLineValue = CustomChunkGenerator.onIsleLineModifier.modify(Math.abs(NoiseHelper.simplexNoise2D(x, y, 0.01*zoomFactor, 0.5, 2, 1)));
+				if (f < 0.175 && f > 0.05){
+					float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, y, 0.05*zoomFactor, 0.5, 2, 6));
+					double lineValue = Math.abs(NoiseHelper.simplexNoise2D(x, y, 0.01*zoomFactor, 0.5, 2, 1));
+					double isleLineValue = CustomChunkGenerator.onIsleLineModifier.modify(lineValue);
 					double multValue = (CustomChunkGenerator.isleLineModifier.modify(isleNoise)*isleLineValue+CustomChunkGenerator.isleGeneralModifier.modify(isleNoise)*(1-isleLineValue));
-					f += 0.3*multValue*CustomChunkGenerator.isleHeightModifier.modify(f);
+					f += 0.8*multValue*CustomChunkGenerator.isleHeightModifier.modify(f);
 //					while (f > 0.2){
 //						f *= 0.9;
 //					}
-					if (f < 0.175)
-						f = 0;
 				}
+				if (f < 0.175)
+					f = 0;
 //				if (NoiseHelper.simplexNoise2DSelector(x, y, 0.01, 0.5, 2, (int)z, NoiseHelper.openSimplexNoise, 0.175, false, true))
 //					f = 1;
 				
-				double b = 0;
-				if (f > 0){
-					b = NoiseHelper.simplexNoise2D(x, y, 0.0015*zoomFactor, 0.5, 2, 8);
-					
-//					if (x % 4 == 0 || y % 4 == 0)
-//						f = clamp(f-0.5f,0,1);
-				}
-//				img.setRGB(x, y, new Color(clamp((float)(b+f),0,1),f,clamp((float)(-b+f),0,1)).getRGB());
-				img.setRGB(x, y, new Color(f,f,f).getRGB());
+				float b = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.5, 2, 8);
+				img.setRGB(x+size/2, y+size/2, new Color(clamp((float)(b+f),0,1),f,clamp((float)(-b+f),0,1)).getRGB());
+//				if (f > 0.175)
+//					img.setRGB(x+size/2, y+size/2, new Color(0,f,0).getRGB());
+//				else
+//					img.setRGB(x+size/2, y+size/2, new Color(f,f,f).getRGB());
+				if (Math.abs(x) < 2 || Math.abs(y) < 2)
+					img.setRGB(x+size/2, y+size/2, new Color(f,0,0).getRGB());
 			}
 		}
 	}

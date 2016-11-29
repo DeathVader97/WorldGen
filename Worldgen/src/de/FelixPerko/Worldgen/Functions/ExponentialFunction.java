@@ -31,12 +31,13 @@ public class ExponentialFunction extends Function {
 
 	@Override
 	public Function derivative() {
-		if (basis == Math.E){
-			if (exponent == null)
-				return this;
-			return 
-		}
-		
+//		if (basis == Math.E){
+//			if (exponent == null)
+//				return this;
+//			return 
+//		}
+//TODO
+		return null;
 	}
 
 }
