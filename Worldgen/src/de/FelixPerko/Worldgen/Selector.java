@@ -13,11 +13,12 @@ public class Selector {
 		enabled = new boolean[size];
 	}
 	
-	public void setFeature(TerrainFeature feature, double definiteMin, double definiteMax){
+	public Selector setFeature(TerrainFeature feature, double definiteMin, double definiteMax){
 		int i = feature.ordinal();
 		enabled[i] = true;
 		this.definiteMin[i] = definiteMin;
 		this.definiteMax[i] = definiteMax;
+		return this;
 	}
 	
 	public double getDifference(double[] features){
@@ -28,9 +29,9 @@ public class Selector {
 				double min = definiteMin[i];
 				double max = definiteMax[i];
 				if (f < min){
-					ret += min-f;
+					ret += Math.pow(min-f,2);
 				}if (f > max){
-					ret += f-max;
+					ret += Math.pow(f-max,2);
 				}else
 					continue;
 			}

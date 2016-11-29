@@ -2,6 +2,7 @@ package de.FelixPerko.Worldgen;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -85,14 +86,31 @@ public class Main extends JavaPlugin{
 		}
 	}
 	
-	public static long seed = 2;
+	public static long seed = 3;
 	public static Random rand = new Random(seed);
 	public static OpenSimplexNoise baseNoise = new OpenSimplexNoise(rand.nextLong());
 	public static OpenSimplexNoise temperatureNoise = new OpenSimplexNoise(rand.nextLong());
 	public static OpenSimplexNoise humidityNoise = new OpenSimplexNoise(rand.nextLong());
 	public static OpenSimplexNoise isleNoise = new OpenSimplexNoise(rand.nextLong());
 	public static OpenSimplexNoise isleLineNoise = new OpenSimplexNoise(rand.nextLong());
-
+	
+	public static ArrayList<TerrainType> terrainTypes = new ArrayList<>();
+	static {
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, -1, -0.25),new Color(1f,1f,1f))); //Schnee
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, 0.15, 1.0)
+				.setFeature(TerrainFeature.HUMIDITY, -1, -0.05), new Color(1f,1f,0f))); //Wüste
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, 0.1, 1.0)
+				.setFeature(TerrainFeature.HUMIDITY, 0.0, 0.05), new Color(1f,0.5f,0f))); //Savanne
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, 0.5, 1.0)
+				.setFeature(TerrainFeature.HUMIDITY, 0.1, 1), new Color(0f,0.5f,0f))); //Regenwald
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, -0.1, 0.15)
+				.setFeature(TerrainFeature.HUMIDITY, -0.1, 0.1), new Color(0f,1f,0f))); //Wiese
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, -0.1, 0.15)
+				.setFeature(TerrainFeature.HUMIDITY, 0.05, 0.25), new Color(0f,0.75f,0f))); //Wald
+		terrainTypes.add(new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, -0.1, 0.15)
+				.setFeature(TerrainFeature.HUMIDITY, 0.25, 1), new Color(0.15f,0.25f,0f))); //Sumpf
+	}
+	
 	private static void calcImage(BufferedImage img, int size, double z) {
 		double zoomFactor = 2;
 		for (int x = -size/2 ; x < size/2 ; x++){
@@ -123,32 +141,33 @@ public class Main extends JavaPlugin{
 //				if (NoiseHelper.simplexNoise2DSelector(x, y, 0.01, 0.5, 2, (int)z, NoiseHelper.openSimplexNoise, 0.175, false, true))
 //					f = 1;
 				
-				float t = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.5, 2, 8, temperatureNoise);
+				float t = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.6, 2, 8, temperatureNoise);
 				float h = 0;
 				if (f > 0.175){
-					h = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.5, 2, 8, humidityNoise);
-					if (t < -0.15){
-						img.setRGB(x+size/2, y+size/2, new Color(1f,1f,1f).getRGB()); //snow
-					}
-					else if (t > 0.15){
-						if (h < -0.1){
-							img.setRGB(x+size/2, y+size/2, new Color(1f,1f,0f).getRGB()); //wüste
-						}else if (h > 0.0){
-							img.setRGB(x+size/2, y+size/2, new Color(0f,0.5f,0f).getRGB()); //regenwald
-						}else{
-							img.setRGB(x+size/2, y+size/2, new Color(1f,0.5f,0f).getRGB()); //Savanne
-						}
-					} else {
-						if (h > 0.25){
-							img.setRGB(x+size/2, y+size/2, new Color(0.15f,0.25f,0f).getRGB()); //Swamp
-						}else if (h > 0){
-							img.setRGB(x+size/2, y+size/2, new Color(0f,0.75f,0f).getRGB()); //Wald
-						} else if (h < -0.25){
-							img.setRGB(x+size/2, y+size/2, new Color(1f,0.5f,0f).getRGB()); //Savanne
-						} else {
-							img.setRGB(x+size/2, y+size/2, new Color(0f,1f,0f).getRGB()); //Wiese
-						}
-					}
+					h = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.6, 2, 8, humidityNoise);
+					img.setRGB(x+size/2, y+size/2, getColor(f,t,h).getRGB());
+//					if (t < -0.15){
+//						img.setRGB(x+size/2, y+size/2, new Color(1f,1f,1f).getRGB()); //snow
+//					}
+//					else if (t > 0.15){
+//						if (h < -0.1){
+//							img.setRGB(x+size/2, y+size/2, new Color(1f,1f,0f).getRGB()); //wüste
+//						}else if (h > 0.0){
+//							img.setRGB(x+size/2, y+size/2, new Color(0f,0.5f,0f).getRGB()); //regenwald
+//						}else{
+//							img.setRGB(x+size/2, y+size/2, new Color(1f,0.5f,0f).getRGB()); //Savanne
+//						}
+//					} else {
+//						if (h > 0.25){
+//							img.setRGB(x+size/2, y+size/2, new Color(0.15f,0.25f,0f).getRGB()); //Swamp
+//						}else if (h > 0){
+//							img.setRGB(x+size/2, y+size/2, new Color(0f,0.75f,0f).getRGB()); //Wald
+//						} else if (h < -0.25){
+//							img.setRGB(x+size/2, y+size/2, new Color(1f,0.5f,0f).getRGB()); //Savanne
+//						} else {
+//							img.setRGB(x+size/2, y+size/2, new Color(0f,1f,0f).getRGB()); //Wiese
+//						}
+//					}
 				} else if (t < -0.3){
 					img.setRGB(x+size/2, y+size/2, new Color(0.0f,0.0f,1f).getRGB()); //frozen ocean
 				} else {
@@ -159,6 +178,19 @@ public class Main extends JavaPlugin{
 					img.setRGB(x+size/2, y+size/2, new Color(f,0,0).getRGB());
 			}
 		}
+	}
+	
+	private static Color getColor(double... features){
+		double minDifference = Double.MAX_VALUE;
+		Color c = null;
+		for (TerrainType type : terrainTypes){
+			double d = type.selector.getDifference(features);
+			if (d < minDifference){
+				minDifference = d;
+				c = type.color;
+			}
+		}
+		return c;
 	}
 	
 	private static float clamp(float value, float lowerBorder, float higherBorder){
