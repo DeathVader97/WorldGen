@@ -85,7 +85,7 @@ public class Main extends JavaPlugin{
 		}
 	}
 	
-	public static long seed = 2;
+	public static long seed = 42;
 	public static Random rand = new Random(seed);
 	public static OpenSimplexNoise baseNoise = new OpenSimplexNoise(rand.nextLong());
 	public static OpenSimplexNoise temperatureNoise = new OpenSimplexNoise(rand.nextLong());
