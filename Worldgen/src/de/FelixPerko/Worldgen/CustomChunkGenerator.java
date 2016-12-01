@@ -19,7 +19,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	public static Modifier onIsleLineModifier = new Modifier(0);
 	public static Modifier isleLineModifier = new Modifier(0);
 	public static Modifier isleGeneralModifier = new Modifier(0);
-	public static Modifier isleHeightModifier = new Modifier(1);
+	public static Modifier isleHeightModifier = new Modifier(0);
 	
 	static {
 		heightModifier.addCos(0, 0.23, 32, 70);
@@ -33,7 +33,9 @@ public class CustomChunkGenerator extends ChunkGenerator{
 		
 		isleGeneralModifier.addCos(0.3, 0.5, 0, 0.25);
 		isleGeneralModifier.addConst(0.5, 1, 0.25);
-		
+
+		isleHeightModifier.addCos(0.04, 0.07, 0, 1);
+		isleHeightModifier.addConst(0.07, 0.1, 1);
 		isleHeightModifier.addCos(0.1, 0.175, 1, 0);
 		isleHeightModifier.addConst(0.175, 1, 0);
 		
