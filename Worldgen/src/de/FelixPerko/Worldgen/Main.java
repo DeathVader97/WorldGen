@@ -1,23 +1,25 @@
 package de.FelixPerko.Worldgen;
 
 import java.awt.Color;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Random;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import de.FelixPerko.Worldgen.Functions.Function;
 import de.FelixPerko.Worldgen.Functions.PolynomalFunction;
-import de.FelixPerko.Worldgen.Functions.CombinedFunctions.CombinedDivideFunction;
 import de.FelixPerko.Worldgen.Functions.CombinedFunctions.CombinedMultiplyFunction;
 import de.FelixPerko.Worldgen.Noise.NoiseHelper;
-import de.FelixPerko.Worldgen.Noise.OpenSimplexNoise;
 
 public class Main extends JavaPlugin{
 	
@@ -25,15 +27,30 @@ public class Main extends JavaPlugin{
 	public static int TEST_BIOME_MAP_OLD = 1;
 	public static int TEST_ICE_SHEETS = 2;
 	public static int TEST_FUNCTION = 3;
+	public static int TEST_DUNES = 4;
+	public static int TEST_DUNES2 = 5;
 	
-	static int test = 3;
+	static int test = 2;
 	
 	public static TerrainGenerator generator = new DefaultGenerator(43);
 	
+	public static CustomChunkGenerator chunkGenerator = new CustomChunkGenerator();
+	
 	@Override
 	public ChunkGenerator getDefaultWorldGenerator(String worldName, String id) {
-		return new CustomChunkGenerator();
+		return chunkGenerator;
 	}
+	
+	@Override
+	public void onEnable(){
+        PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvent(WorldInitEvent.class, new Listener(){
+            public void onWorldInit(WorldInitEvent event) {
+                event.getWorld().getPopulators().add(chunkGenerator.getPopulator());
+            }
+        }, EventPriority.NORMAL, null, this);
+    }
+
 	
 	public static void main(String[] args) {
 		displayImage();
@@ -62,7 +79,12 @@ public class Main extends JavaPlugin{
 			
 //			calcImage(img, size, z);
 			label.setIcon(new ImageIcon(img));
-				
+			Point mousePos = f.getMousePosition();
+			if ((test == 1 || test == 0) && mousePos != null){
+				mousePos.translate(-size/2, -size/2-10);
+				double factor = IMG_ZOOM_FACTOR/CustomChunkGenerator.ZOOM_FACTOR;
+				System.out.println(mousePos.x*factor+","+mousePos.y*factor);
+			}
 			try{
 				Thread.sleep(1000);
 			} catch (Exception e){
@@ -78,8 +100,10 @@ public class Main extends JavaPlugin{
 		}
 	}
 	
+	public final static double IMG_ZOOM_FACTOR = 3;
+	
 	private static void calcImage(BufferedImage img, int size, double z) {
-		double zoomFactor = 3;
+		double zoomFactor = IMG_ZOOM_FACTOR;
 		double fBefore = Double.NaN;
 		Modifier m = new Modifier(0);
 		m.addCos(0, 0.7, 0, 0.2).addFunc(0.7, 1,
@@ -90,6 +114,22 @@ public class Main extends JavaPlugin{
 			double funX = x*(1.0/size)*2.1;
 			double modifierValue = m.modify(funX);
 			double yFunction = (-modifierValue/(1.0/size)/2.175);
+			
+			if (test == TEST_DUNES2){
+				float u = (float) ((x)*0.01);
+				float gap = 0.25f;
+				u += NoiseHelper.simplexNoise2D(x, 0, 0.005, 0.5, 2, 4)*0.5;
+				if (u < 0)
+					u = (1+gap)-((-u+0.5f+0.5f*gap)%(1+gap));
+				else
+					u = u%(1+gap)-gap;
+				if (u < 0)
+					u = 0;
+				u = (float) -(m.modify(u));
+				u *= NoiseHelper.simplexNoise2D(x+10000, 0, 0.005, 0.5, 2, 1)*0.5+0.5;
+				for (int i = 0 ; i < (u*size*0.2)+size*(4.5/5.0) ; i++)
+					img.setRGB(x+size/2, i, new Color(1f,1f,1f).getRGB()); //frozen ocean
+			}
 			for (int y = -size/2 ; y < size/2 ; y++){
 				
 				if (test == TEST_FUNCTION){
@@ -113,9 +153,29 @@ public class Main extends JavaPlugin{
 						img.setRGB(x+size/2, y+size/2, new Color(0f,0f,0.5f).getRGB()); //ocean
 					}
 				}
+				
+				if (test == TEST_DUNES){
+					double zoom = 0.05;
+					float u = (float) ((x+y)*zoom);
+					u += NoiseHelper.simplexNoise2D(x, y, 1*zoom, 0.5, 2, 2)*0.5;
+					float gap = 1f;
+					if (u < 0)
+						u = (1+gap)-((-u+0.5f+0.5f*gap)%(1+gap));
+					else
+						u = (u%(1+gap))-gap;
+					if (u < 0)
+						u = 0;
+					u = (float) (m.modify(u)*5);
+					u *= NoiseHelper.simplexNoise2D(x+10000, y, 0.25*zoom, 0.5, 2, 3)*0.5;
+					if (u < 0)
+						u = 0;
+					img.setRGB(x+size/2, y+size/2, new Color(u,u,u).getRGB()); //frozen ocean
+				}
 					
 				if (test == TEST_BIOME_MAP || test == TEST_BIOME_MAP_OLD){
-					TerrainData data = generator.getData(zoomFactor, x, y);
+					int offsetX = 0;
+					int offsetZ = 0;
+					TerrainData data = generator.getData(zoomFactor, x+offsetX, y+offsetZ);
 					if (Math.abs(x) == 0 || Math.abs(y) == 0)
 						img.setRGB(x+size/2, y+size/2, new Color((float)data.properties[TerrainFeature.BASIC.ordinal()],0,0).getRGB());
 					else

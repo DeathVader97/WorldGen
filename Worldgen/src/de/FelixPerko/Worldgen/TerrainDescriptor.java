@@ -3,10 +3,13 @@ package de.FelixPerko.Worldgen;
 import java.util.ArrayList;
 
 import org.bukkit.Material;
+import org.bukkit.block.Biome;
 
 public class TerrainDescriptor {
 	
 	public ArrayList<MaterialDescriptor> blocks = new ArrayList<>();
+	public Biome representationBiome = Biome.PLAINS;
+	public SurfaceModifier modifier = null;
 	
 	/**
 	 * creates the default (empty) descriptor.

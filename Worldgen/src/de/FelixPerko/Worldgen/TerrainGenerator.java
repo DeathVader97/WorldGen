@@ -28,16 +28,22 @@ public abstract class TerrainGenerator {
 	
 	public abstract TerrainData getData(double zoomFactor, double x, double y);
 	
-	protected TerrainType getType(double... features){
+	protected TerrainTypeInfo getTypeInfo(double... features){
 		double minDifference = Double.MAX_VALUE;
 		TerrainType ans = null;
+		double d1 = 0;
+		TerrainType ans2 = null;
+		double d2 = 0;
 		for (TerrainType type : terrainTypes){
 			double d = type.selector.getDifference(features);
 			if (d < minDifference){
 				minDifference = d;
+				ans2 = ans;
+				d2 = d1;
 				ans = type;
+				d1 = d;
 			}
 		}
-		return ans;
+		return new TerrainTypeInfo(ans, d1, ans2, d2);
 	}
 }

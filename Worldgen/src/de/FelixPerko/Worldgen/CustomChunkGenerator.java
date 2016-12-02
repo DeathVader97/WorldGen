@@ -1,10 +1,14 @@
 package de.FelixPerko.Worldgen;
 
+import java.util.HashMap;
 import java.util.Random;
 
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
+import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 
 import de.FelixPerko.Worldgen.Interpolation.Modifier;
@@ -41,24 +45,53 @@ public class CustomChunkGenerator extends ChunkGenerator{
 		
 	}
 	
+	public final static double ZOOM_FACTOR = 0.05;
+	HashMap<Integer,HashMap<Integer,TerrainData[][]>> data = new HashMap<>();
+	
 	@Override
 	public byte[][] generateBlockSections(World world, Random random, int chunkX, int chunkZ, BiomeGrid biomes) {
 		byte[][] result = new byte[world.getMaxHeight() / 16][]; //world height / chunk part height (=16, look above)
 		result[0] = new byte[4096];
 		int xOffset = chunkX*16;
 		int zOffset = chunkZ*16;
-		double zoomFactor = 0.05;
+		
+		TerrainData[][] dataMap = new TerrainData[16][];
+		
 		for (int x = xOffset ; x < xOffset+16 ; x++){
+			dataMap[x] = new TerrainData[16];
 			for (int z = zOffset ; z < zOffset+16 ; z++){
-				float value = (float)NoiseHelper.simplexNoise2D(x, z, 0.003*zoomFactor, 0.5, 2, 8);
-				if (value < 0)
-					value = -value;
-				
-				if (value < 0.175){
-					float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.05*zoomFactor, 0.5, 2, 6));
-					double isleLineValue = CustomChunkGenerator.onIsleLineModifier.modify(Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.01*zoomFactor, 0.5, 2, 1)));
-					double multValue = (CustomChunkGenerator.isleLineModifier.modify(isleNoise)*isleLineValue+CustomChunkGenerator.isleGeneralModifier.modify(isleNoise)*(1-isleLineValue));
-					value += 0.4*multValue*CustomChunkGenerator.isleHeightModifier.modify(value);
+				TerrainData data = Main.generator.getData(ZOOM_FACTOR, x, z);
+				dataMap[x-xOffset][z-zOffset] = data;
+				biomes.setBiome(x, z, data.type.descriptor.representationBiome);
+				if (data.type.descriptor.modifier != null)
+					data.type.descriptor.modifier.modify(data, x, z);
+				double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
+				int currentY = (int) terrainHeight;
+				for (MaterialDescriptor desc : data.type.descriptor.blocks){
+					for (int i = 0 ; i < desc.depth ; i++){
+						setBlock(result, x-xOffset, currentY, z-zOffset, (byte)desc.material);
+						currentY--;
+						if (currentY < 0)
+							break;
+					}
+					if (currentY < 0)
+						break;
+				}
+			}
+		}
+		if (!data.containsKey(chunkX))
+			data.put(chunkX, new HashMap<>());
+		data.get(chunkX).put(chunkZ, dataMap);
+		return result;
+//				float value = (float)NoiseHelper.simplexNoise2D(x, z, 0.003*zoomFactor, 0.5, 2, 8);
+//				if (value < 0)
+//					value = -value;
+//				
+//				if (value < 0.175){
+//					float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.05*zoomFactor, 0.5, 2, 6));
+//					double isleLineValue = CustomChunkGenerator.onIsleLineModifier.modify(Math.abs(NoiseHelper.simplexNoise2D(x, z, 0.01*zoomFactor, 0.5, 2, 1)));
+//					double multValue = (CustomChunkGenerator.isleLineModifier.modify(isleNoise)*isleLineValue+CustomChunkGenerator.isleGeneralModifier.modify(isleNoise)*(1-isleLineValue));
+//					value += 0.4*multValue*CustomChunkGenerator.isleHeightModifier.modify(value);
 //					if (onIsleLine){
 //						if (isleNoise > 0.4)
 //							value += isleNoise/3;
@@ -67,20 +100,16 @@ public class CustomChunkGenerator extends ChunkGenerator{
 //					}
 //					if (value < 0.175)
 //						value = 0;
-				}
-				double yd = heightModifier.modify(value);
-				for (int y = (int)yd ; y > 0 ; y--){
-					setBlock(result, x-xOffset, y, z-zOffset, (byte)Material.DIRT.getId());
-				}
-				if (yd < 64){
-					for (int y = 64 ; y > (int)yd ; y--){
-						setBlock(result, x-xOffset, y, z-zOffset, (byte)Material.WATER.getId());
-					}
-				}
-			}
-		}
-		
-		return result;
+//				}
+//				double yd = heightModifier.modify(value);
+//				for (int y = (int)yd ; y > 0 ; y--){
+//					setBlock(result, x-xOffset, y, z-zOffset, (byte)Material.DIRT.getId());
+//				}
+//				if (yd < 64){
+//					for (int y = 64 ; y > (int)yd ; y--){
+//						setBlock(result, x-xOffset, y, z-zOffset, (byte)Material.WATER.getId());
+//					}
+//				}
 		
 //		byte[][] result = new byte[world.getMaxHeight() / 16][]; //world height / chunk part height (=16, look above)
 ////		result[0] = new byte[4096];
@@ -266,5 +295,31 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	    }
 	    // set the block (look above, how this is done)
 	    result[y >> 4][((y & 0xF) << 8) | (z << 4) | x] = blkid;
+	}
+
+	public BlockPopulator getPopulator() {
+		return new BlockPopulator() {
+			
+			@Override
+			public void populate(World w, Random r, Chunk c) {
+				int chunkX = c.getX();
+				int chunkZ = c.getZ();
+				int offsetX = chunkX*16;
+				int offsetZ = chunkZ*16;
+				TerrainData[][] map = data.get(c.getX()).get(c.getZ());
+				
+				for (int x = offsetX ; x < offsetX+16 ; x++){
+					for (int z = offsetZ ; z < offsetZ+16 ; z++){
+						TerrainData data = map[x-offsetX][z-offsetZ];
+						double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
+						if (w.getBlockAt(x, (int)terrainHeight, z).getType() == Material.GRASS){
+							Block b = w.getBlockAt(x, (int)terrainHeight+1 , z);
+							b.setType(Material.LONG_GRASS);
+							b.setData((byte) 1);
+						}
+					}
+				}
+			}
+		};
 	}
 }
