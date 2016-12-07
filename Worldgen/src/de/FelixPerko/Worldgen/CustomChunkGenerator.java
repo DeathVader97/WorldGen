@@ -1,6 +1,8 @@
 package de.FelixPerko.Worldgen;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Chunk;
@@ -24,6 +26,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	public static Modifier isleLineModifier = new Modifier(0);
 	public static Modifier isleGeneralModifier = new Modifier(0);
 	public static Modifier isleHeightModifier = new Modifier(0);
+	public static int waterHeight = 64;
 	
 	static {
 		heightModifier.addCos(0, 0.23, 32, 70);
@@ -46,7 +49,13 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	}
 	
 	public final static double ZOOM_FACTOR = 0.05;
+	
 	HashMap<Integer,HashMap<Integer,TerrainData[][]>> data = new HashMap<>();
+	
+    @Override
+    public List<BlockPopulator> getDefaultPopulators(World world) {
+        return Arrays.asList((BlockPopulator) getPopulator());
+    }
 	
 	@Override
 	public byte[][] generateBlockSections(World world, Random random, int chunkX, int chunkZ, BiomeGrid biomes) {
@@ -58,15 +67,17 @@ public class CustomChunkGenerator extends ChunkGenerator{
 		TerrainData[][] dataMap = new TerrainData[16][];
 		
 		for (int x = xOffset ; x < xOffset+16 ; x++){
-			dataMap[x] = new TerrainData[16];
+			dataMap[x-xOffset] = new TerrainData[16];
 			for (int z = zOffset ; z < zOffset+16 ; z++){
 				TerrainData data = Main.generator.getData(ZOOM_FACTOR, x, z);
 				dataMap[x-xOffset][z-zOffset] = data;
-				biomes.setBiome(x, z, data.type.descriptor.representationBiome);
+				biomes.setBiome(x-xOffset, z-zOffset, data.type.descriptor.representationBiome);
 				if (data.type.descriptor.modifier != null)
-					data.type.descriptor.modifier.modify(data, x, z);
+					data.type.descriptor.modifier.onGeneration(data, x, z, xOffset, zOffset, result);
 				double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
 				int currentY = (int) terrainHeight;
+				for (int i = waterHeight ; i > (int)terrainHeight ; i--)
+					setBlock(result, x-xOffset, i, z-zOffset, (byte)Material.WATER.getId());
 				for (MaterialDescriptor desc : data.type.descriptor.blocks){
 					for (int i = 0 ; i < desc.depth ; i++){
 						setBlock(result, x-xOffset, currentY, z-zOffset, (byte)desc.material);
@@ -311,6 +322,8 @@ public class CustomChunkGenerator extends ChunkGenerator{
 				for (int x = offsetX ; x < offsetX+16 ; x++){
 					for (int z = offsetZ ; z < offsetZ+16 ; z++){
 						TerrainData data = map[x-offsetX][z-offsetZ];
+						if (data.type.descriptor.modifier != null)
+							data.type.descriptor.modifier.onPopulation(data, x, z, w);
 						double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
 						if (w.getBlockAt(x, (int)terrainHeight, z).getType() == Material.GRASS){
 							Block b = w.getBlockAt(x, (int)terrainHeight+1 , z);

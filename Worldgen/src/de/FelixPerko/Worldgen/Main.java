@@ -1,20 +1,13 @@
 package de.FelixPerko.Worldgen;
 
 import java.awt.Color;
-import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import org.bukkit.Bukkit;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.plugin.EventExecutor;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.FelixPerko.Worldgen.Functions.PolynomalFunction;
@@ -43,12 +36,12 @@ public class Main extends JavaPlugin{
 	
 	@Override
 	public void onEnable(){
-        PluginManager pm = this.getServer().getPluginManager();
-        pm.registerEvent(WorldInitEvent.class, new Listener(){
-            public void onWorldInit(WorldInitEvent event) {
-                event.getWorld().getPopulators().add(chunkGenerator.getPopulator());
-            }
-        }, EventPriority.NORMAL, null, this);
+//        PluginManager pm = this.getServer().getPluginManager();
+//        pm.registerEvent(WorldInitEvent.class, new Listener(){
+//            public void onWorldInit(WorldInitEvent event) {
+//                event.getWorld().getPopulators().add(chunkGenerator.getPopulator());
+//            }
+//        }, EventPriority.NORMAL, null, this);
     }
 
 	
@@ -57,7 +50,7 @@ public class Main extends JavaPlugin{
 	}
 
 	private static void displayImage() {
-		int size = 700;
+		int size = 1000;
 		BufferedImage img = new BufferedImage((int)(size), (int)(size), BufferedImage.TYPE_INT_RGB);
 		JFrame f = new JFrame();
 		JLabel label = new JLabel(new ImageIcon(img));
@@ -100,7 +93,7 @@ public class Main extends JavaPlugin{
 		}
 	}
 	
-	public final static double IMG_ZOOM_FACTOR = 3;
+	public final static double IMG_ZOOM_FACTOR = 0.1;
 	
 	private static void calcImage(BufferedImage img, int size, double z) {
 		double zoomFactor = IMG_ZOOM_FACTOR;
@@ -180,6 +173,8 @@ public class Main extends JavaPlugin{
 						img.setRGB(x+size/2, y+size/2, new Color((float)data.properties[TerrainFeature.BASIC.ordinal()],0,0).getRGB());
 					else
 						img.setRGB(x+size/2, y+size/2, data.type.color.getRGB());
+					if (data.gradient > 0)
+						img.setRGB(x+size/2, y+size/2, new Color((float)data.gradient,(float)data.gradient,(float)data.gradient).getRGB());
 				
 					if (test == TEST_BIOME_MAP_OLD){
 						double f = data.properties[TerrainFeature.BASIC.ordinal()];

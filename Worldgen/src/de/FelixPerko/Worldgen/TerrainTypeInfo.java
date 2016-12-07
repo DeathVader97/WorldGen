@@ -13,7 +13,7 @@ public class TerrainTypeInfo {
 	public TerrainTypeInfo(TerrainType mainType, double d1, TerrainType secondType, double d2) {
 		this.mainType = mainType;
 		this.secondType = secondType;
-		this.gradient = d1/d2;
+		this.gradient = 0;
 	}
 
 }

@@ -3,7 +3,9 @@ package de.FelixPerko.Worldgen;
 import java.awt.Color;
 
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
 
 import de.FelixPerko.Worldgen.Noise.NoiseHelper;
 
@@ -17,6 +19,18 @@ public class DefaultGenerator extends TerrainGenerator {
 				.setCondition(TerrainFeature.BASIC, waterBorder, 1),new Color(1f,1f,1f));
 		snow.descriptor.blocks.set(0, new MaterialDescriptor(1, Material.SNOW_BLOCK.getId()));
 		snow.descriptor.representationBiome = Biome.ICE_FLATS;
+		snow.descriptor.modifier = new SurfaceModifier() {
+			@Override public void onGeneration(TerrainData data, int x, int z, int xOffset, int zOffset, byte[][] result) {
+				data.properties[0] += NoiseHelper.simplexNoise2D(x, z, 0.25*CustomChunkGenerator.ZOOM_FACTOR, 0.5, 2, 4)*0.4+0.15;
+			}
+			@SuppressWarnings("deprecation") @Override public void onPopulation(TerrainData data, int x, int z, World w) {
+				double y = CustomChunkGenerator.heightModifier.modify(data.properties[0]);
+				byte blockData = (byte)(8*(y-(int)y));
+				Block b = w.getBlockAt(x, (int)y+1, z);
+				b.setType(Material.SNOW);
+				b.setData(blockData);
+			}
+		};
 		TerrainType desert = new TerrainType(new Selector().setFeature(TerrainFeature.TEMPERATURE, 0.25, 1.0)
 				.setFeature(TerrainFeature.HUMIDITY, -1, -0.05)
 				.setCondition(TerrainFeature.BASIC, waterBorder, 1), new Color(1f,1f,0f));
@@ -51,6 +65,15 @@ public class DefaultGenerator extends TerrainGenerator {
 				.setFeature(TerrainFeature.TEMPERATURE, -1, -0.2), new Color(0f,0f,1f));
 		frozenOcean.descriptor.blocks.set(0, new MaterialDescriptor(1, Material.DIRT.getId()));
 		frozenOcean.descriptor.representationBiome = Biome.FROZEN_OCEAN;
+		frozenOcean.descriptor.modifier = new SurfaceModifier() {
+			@Override public void onGeneration(TerrainData data, int x, int z, int xOffset, int zOffset, byte[][] result) {
+				double v = NoiseHelper.simplexNoise2D(x, z, 0.05, 0.5, 2, 8)*0.5+0.5;
+				if (v > (-data.properties[TerrainFeature.TEMPERATURE.ordinal()]-0.2)*2)
+					Main.chunkGenerator.setBlock(result, x-xOffset, 64, z-zOffset, (byte)Material.ICE.getId());
+			}
+			@SuppressWarnings("deprecation") @Override public void onPopulation(TerrainData data, int x, int z, World w) {
+			}
+		};
 		terrainTypes.add(snow); //Schnee
 		terrainTypes.add(desert); //Wüste
 		terrainTypes.add(savanna); //Savanne
@@ -75,11 +98,13 @@ public class DefaultGenerator extends TerrainGenerator {
 			}
 			
 			float t = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.6, 2, 8, temperatureNoise);
+			t += (float) NoiseHelper.simplexNoise2D(x, y, 4*zoomFactor, 0.5, 2, 2, temperatureNoise)*0.025;
 			float h = 0;
 			if (f > 0.175){
 				h = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.6, 2, 8, humidityNoise);
-				return new TerrainData(getTypeInfo(f,t,h), f,t,h);
+				h += (float) NoiseHelper.simplexNoise2D(x, y, 4*zoomFactor, 0.5, 2, 2, humidityNoise)*0.025;
+				return new TerrainData(getTypeInfo(f, t, h), f, t, h);
 			}
-			return new TerrainData(getTypeInfo(f,t,0), f,t,0);
+			return new TerrainData(getTypeInfo(f, t, 0), f, t, 0);
 	}
 }
