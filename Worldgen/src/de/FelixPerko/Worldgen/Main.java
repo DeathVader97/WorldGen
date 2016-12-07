@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.FelixPerko.Worldgen.BiomeGrid.BiomeGrid;
 import de.FelixPerko.Worldgen.Functions.PolynomalFunction;
 import de.FelixPerko.Worldgen.Functions.CombinedFunctions.CombinedMultiplyFunction;
 import de.FelixPerko.Worldgen.Noise.NoiseHelper;
@@ -22,8 +23,9 @@ public class Main extends JavaPlugin{
 	public static int TEST_FUNCTION = 3;
 	public static int TEST_DUNES = 4;
 	public static int TEST_DUNES2 = 5;
+	public static int TEST_BIOME_GRID = 6;
 	
-	static int test = 2;
+	static int test = 6;
 	
 	public static TerrainGenerator generator = new DefaultGenerator(43);
 	
@@ -50,7 +52,7 @@ public class Main extends JavaPlugin{
 	}
 
 	private static void displayImage() {
-		int size = 1000;
+		int size = 700;
 		BufferedImage img = new BufferedImage((int)(size), (int)(size), BufferedImage.TYPE_INT_RGB);
 		JFrame f = new JFrame();
 		JLabel label = new JLabel(new ImageIcon(img));
@@ -62,7 +64,19 @@ public class Main extends JavaPlugin{
 		int i = 0;
 		long secCounter = 0;
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		calcImage(img, size, z);
+		if (test == TEST_BIOME_GRID){
+			new BiomeGrid(new float[][]{{1,1,0,1,1,1,1,1,1,1},
+				{1,0,1,1,1,1,1,1,1,1},
+				{1,1,1,0,1,1,1,0,0,1},
+					{1,1,1,1,1,1,1,0,1,1},
+					{1,1,0,0,1,1,1,1,1,1},
+					{0,0,0,0,0,1,1,1,0,0},
+					{0,0,0,0,0,0,1,0,0,0},
+					{0,0,0,0,0,0,0,0,0,0},
+					{0,0,0,0,0,0,0,0,0,0},
+					{0,0,0,0,0,0,0,0,0,0}}).setColors(img, size);
+		} else 
+			calcImage(img, size, z);
 		while (!Thread.interrupted()){
 			t1 = System.currentTimeMillis();
 			z += 0.005;
