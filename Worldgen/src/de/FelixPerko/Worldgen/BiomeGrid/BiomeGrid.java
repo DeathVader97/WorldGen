@@ -2,10 +2,13 @@ package de.FelixPerko.Worldgen.BiomeGrid;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+
+import de.FelixPerko.Worldgen.Utils.Pair;
 
 public class BiomeGrid {
 	int size = 10;
-	GridPoint[][] points = new GridPoint[size][size];
+	HashMap<Pair<Integer, Integer>, Double> map = new HashMap<>();
 	
 	public BiomeGrid(float[][] v){
 		for (int x = 0 ; x < size ; x++){

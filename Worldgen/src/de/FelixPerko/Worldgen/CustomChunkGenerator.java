@@ -16,6 +16,7 @@ import org.bukkit.generator.ChunkGenerator;
 import de.FelixPerko.Worldgen.Interpolation.Modifier;
 import de.FelixPerko.Worldgen.Noise.NoiseHelper;
 import de.FelixPerko.Worldgen.Noise.OpenSimplexNoise;
+import de.FelixPerko.Worldgen.Utils.Pair;
 
 public class CustomChunkGenerator extends ChunkGenerator{
 	
@@ -50,7 +51,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	
 	public final static double ZOOM_FACTOR = 0.05;
 	
-	HashMap<Integer,HashMap<Integer,TerrainData[][]>> data = new HashMap<>();
+	HashMap<Pair<Integer, Integer>,TerrainData> data = new HashMap<>();
 	
     @Override
     public List<BlockPopulator> getDefaultPopulators(World world) {
