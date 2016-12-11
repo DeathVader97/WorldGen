@@ -51,7 +51,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	
 	public final static double ZOOM_FACTOR = 0.05;
 	
-	HashMap<Pair<Integer, Integer>,TerrainData> data = new HashMap<>();
+	HashMap<Pair<Integer, Integer>,TerrainData[][]> data = new HashMap<>();
 	
     @Override
     public List<BlockPopulator> getDefaultPopulators(World world) {
@@ -91,9 +91,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 				}
 			}
 		}
-		if (!data.containsKey(chunkX))
-			data.put(chunkX, new HashMap<>());
-		data.get(chunkX).put(chunkZ, dataMap);
+		data.put(new Pair<Integer, Integer>(chunkX, chunkZ), dataMap);
 		return result;
 //				float value = (float)NoiseHelper.simplexNoise2D(x, z, 0.003*zoomFactor, 0.5, 2, 8);
 //				if (value < 0)
@@ -318,7 +316,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 				int chunkZ = c.getZ();
 				int offsetX = chunkX*16;
 				int offsetZ = chunkZ*16;
-				TerrainData[][] map = data.get(c.getX()).get(c.getZ());
+				TerrainData[][] map = data.get(new Pair<Integer, Integer>(chunkX, chunkZ));
 				
 				for (int x = offsetX ; x < offsetX+16 ; x++){
 					for (int z = offsetZ ; z < offsetZ+16 ; z++){

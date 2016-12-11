@@ -10,17 +10,7 @@ public class BiomeGrid {
 	int size = 10;
 	HashMap<Pair<Integer, Integer>, Double> map = new HashMap<>();
 	
-	public BiomeGrid(float[][] v){
-		for (int x = 0 ; x < size ; x++){
-			for (int y = 0 ; y < size ; y++){
-				points[x][y] = new GridPoint(v[y][x]);
-			}
-		}
-		for (int x = 0 ; x < size ; x++){
-			for (int y = 0 ; y < size ; y++){
-				smooth(x,y,2);
-			}
-		}
+	public BiomeGrid(){
 	}
 	
 	public void smooth(int xp, int yp, int rad){
@@ -29,11 +19,8 @@ public class BiomeGrid {
 		for(int xo = -rad ; xo <= rad ; xo++){
 			for (int yo = -rad ; yo <= rad ; yo++){
 				int x = xp+xo;
-				if (x < 0 || x >= size)
-					continue;
 				int y = yp+yo;
-				if (y < 0 || y >= size)
-					continue;
+				Double value = getRawValue(x,y);
 				sum += points[x][y].originalValue;
 				amount++;
 			}
@@ -41,6 +28,20 @@ public class BiomeGrid {
 		points[xp][yp].smoothedValue = sum/amount;
 	}
 	
+	private Double getRawValue(int x, int y) {
+		Double v = map.get(new Pair<Integer, Integer>(x, y));
+		if (v == null){
+			v = generateRawValue(x,y);
+			map.put(new Pair<Integer, Integer>(x,y), v);
+		}
+		return v;
+	}
+
+	private Double generateRawValue(int x, int y) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public void setColors(BufferedImage img, int imgSize){
 		int gridImgSize = imgSize/size;
 		for (int x = 0 ; x < imgSize ; x++){
