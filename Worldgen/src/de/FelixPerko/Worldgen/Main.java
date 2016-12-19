@@ -10,10 +10,10 @@ import javax.swing.JLabel;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import de.FelixPerko.Worldgen.BiomeGrid.BiomeGrid;
 import de.FelixPerko.Worldgen.Functions.PolynomalFunction;
 import de.FelixPerko.Worldgen.Functions.CombinedFunctions.CombinedMultiplyFunction;
 import de.FelixPerko.Worldgen.Noise.NoiseHelper;
+import de.FelixPerko.Worldgen.Utils.Pair;
 
 public class Main extends JavaPlugin{
 	
@@ -23,9 +23,11 @@ public class Main extends JavaPlugin{
 	public static int TEST_FUNCTION = 3;
 	public static int TEST_DUNES = 4;
 	public static int TEST_DUNES2 = 5;
-	public static int TEST_BIOME_GRID = 6;
+	public static int TEST_BIOME_GRID = 6; //DISABLED
 	
-	static int test = 6;
+	static int test = 0;
+	
+	public final static double IMG_ZOOM_FACTOR = 0.25;
 	
 	public static TerrainGenerator generator = new DefaultGenerator(43);
 	
@@ -64,19 +66,7 @@ public class Main extends JavaPlugin{
 		int i = 0;
 		long secCounter = 0;
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		if (test == TEST_BIOME_GRID){
-			new BiomeGrid(new float[][]{{1,1,0,1,1,1,1,1,1,1},
-				{1,0,1,1,1,1,1,1,1,1},
-				{1,1,1,0,1,1,1,0,0,1},
-					{1,1,1,1,1,1,1,0,1,1},
-					{1,1,0,0,1,1,1,1,1,1},
-					{0,0,0,0,0,1,1,1,0,0},
-					{0,0,0,0,0,0,1,0,0,0},
-					{0,0,0,0,0,0,0,0,0,0},
-					{0,0,0,0,0,0,0,0,0,0},
-					{0,0,0,0,0,0,0,0,0,0}}).setColors(img, size);
-		} else 
-			calcImage(img, size, z);
+		calcImage(img, size, z);
 		while (!Thread.interrupted()){
 			t1 = System.currentTimeMillis();
 			z += 0.005;
@@ -106,8 +96,6 @@ public class Main extends JavaPlugin{
 			}
 		}
 	}
-	
-	public final static double IMG_ZOOM_FACTOR = 0.1;
 	
 	private static void calcImage(BufferedImage img, int size, double z) {
 		double zoomFactor = IMG_ZOOM_FACTOR;
@@ -187,9 +175,24 @@ public class Main extends JavaPlugin{
 						img.setRGB(x+size/2, y+size/2, new Color((float)data.properties[TerrainFeature.BASIC.ordinal()],0,0).getRGB());
 					else
 						img.setRGB(x+size/2, y+size/2, data.type.color.getRGB());
-					if (data.gradient > 0)
-						img.setRGB(x+size/2, y+size/2, new Color((float)data.gradient,(float)data.gradient,(float)data.gradient).getRGB());
-				
+					float r = 0, g = 0, b = 0;
+					int i;
+					Pair<Integer, Float>[] values = generator.biomeGrid.getValue(x, y);
+					for (i = 0 ; i < values.length ; i++){
+						float mult = values[i].getSecond();
+						if (mult == 0)
+							break;
+						int index = values[i].getFirst();
+						Color c = generator.terrainTypes.get(index).color;
+						r += c.getRed()/256f;
+						g += c.getGreen()/256f;
+						b += c.getBlue()/256f;
+					}
+//					System.out.println(r+","+g+","+b);
+//					img.setRGB(x+size/2, y+size/2, new Color(r/(i+1), g/(i+1), b/(i+1)).getRGB());
+//					if (data.gradient > 0)
+//						img.setRGB(x+size/2, y+size/2, new Color((float)data.gradient,(float)data.gradient,(float)data.gradient).getRGB());
+					
 					if (test == TEST_BIOME_MAP_OLD){
 						double f = data.properties[TerrainFeature.BASIC.ordinal()];
 						double t = data.properties[TerrainFeature.TEMPERATURE.ordinal()];
