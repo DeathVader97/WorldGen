@@ -3,7 +3,9 @@ package de.FelixPerko.Worldgen;
 import java.util.ArrayList;
 import java.util.Random;
 
+import de.FelixPerko.Worldgen.BiomeGrid.BiomeGrid;
 import de.FelixPerko.Worldgen.Noise.OpenSimplexNoise;
+import de.FelixPerko.Worldgen.Utils.Pair;
 
 public abstract class TerrainGenerator {
 	public long seed;
@@ -15,6 +17,7 @@ public abstract class TerrainGenerator {
 	public OpenSimplexNoise isleLineNoise;
 	
 	public ArrayList<TerrainType> terrainTypes = new ArrayList<>();
+	public BiomeGrid biomeGrid = new BiomeGrid();
 	
 	public TerrainGenerator(long seed) {
 		this.seed = seed;
@@ -27,6 +30,8 @@ public abstract class TerrainGenerator {
 	}
 	
 	public abstract TerrainData getData(double zoomFactor, double x, double y);
+
+	public abstract TerrainData getChunkData(double zoomFactor, int x, int y);
 	
 	protected TerrainTypeInfo getTypeInfo(double... features){
 		double minDifference = Double.MAX_VALUE;

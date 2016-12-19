@@ -107,4 +107,29 @@ public class DefaultGenerator extends TerrainGenerator {
 			}
 			return new TerrainData(getTypeInfo(f, t, 0), f, t, 0);
 	}
+	
+	public TerrainData getChunkData(double zoomFactor, int chunkX, int chunkZ){
+		int x = chunkX*16;
+		int y = chunkZ*16;
+		float f = (float)NoiseHelper.simplexNoise2D(x, y, 0.003*zoomFactor, 0.5, 2, 8, baseNoise);
+		if (f < 0)
+			f = -f;
+		if (f < 0.175 && f > 0.05){
+			float isleNoise = (float) Math.abs(NoiseHelper.simplexNoise2D(x, y, 0.05*zoomFactor, 0.5, 2, 6, this.isleNoise));
+			double lineValue = Math.abs(NoiseHelper.simplexNoise2D(x, y, 0.01*zoomFactor, 0.5, 2, 1, isleLineNoise));
+			double isleLineValue = CustomChunkGenerator.onIsleLineModifier.modify(lineValue);
+			double multValue = (CustomChunkGenerator.isleLineModifier.modify(isleNoise)*isleLineValue+CustomChunkGenerator.isleGeneralModifier.modify(isleNoise)*(1-isleLineValue));
+			f += 0.8*multValue*CustomChunkGenerator.isleHeightModifier.modify(f);
+		}
+		
+		float t = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.6, 2, 8, temperatureNoise);
+		t += (float) NoiseHelper.simplexNoise2D(x, y, 4*zoomFactor, 0.5, 2, 2, temperatureNoise)*0.025;
+		float h = 0;
+		if (f > 0.175){
+			h = (float) NoiseHelper.simplexNoise2D(x, y, 0.002*zoomFactor, 0.6, 2, 8, humidityNoise);
+			h += (float) NoiseHelper.simplexNoise2D(x, y, 4*zoomFactor, 0.5, 2, 2, humidityNoise)*0.025;
+			return new TerrainData(getTypeInfo(f, t, h), f, t, h);
+		}
+		return new TerrainData(getTypeInfo(f, t, 0), f, t, 0);
+	}
 }
