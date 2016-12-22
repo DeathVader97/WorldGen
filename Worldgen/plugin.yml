@@ -2,3 +2,9 @@ name: Worldgen
 version: 0.1
 main:  de.FelixPerko.Worldgen.Main
 commands:
+   getProperties:
+     description: Gibt die Eigenschaften des Terrains an deiner Position zurueck.
+     usage: Du hast den Befehl falsch eingegeben! /&lt;command&gt;
+   getBiome:
+     description: Gibt das Biom des Terrains an deiner Position zurueck.
+     usage: Du hast den Befehl falsch eingegeben! /&lt;command&gt;

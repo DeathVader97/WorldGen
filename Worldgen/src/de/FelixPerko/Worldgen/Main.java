@@ -7,6 +7,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,7 +29,7 @@ public class Main extends JavaPlugin{
 	
 	static int test = 0;
 	
-	public final static double IMG_ZOOM_FACTOR = 0.25;
+	public final static double IMG_ZOOM_FACTOR = 2;
 	
 	public static TerrainGenerator generator = new DefaultGenerator(43);
 	
@@ -167,7 +169,7 @@ public class Main extends JavaPlugin{
 					img.setRGB(x+size/2, y+size/2, new Color(u,u,u).getRGB()); //frozen ocean
 				}
 					
-				if (test == TEST_BIOME_MAP || test == TEST_BIOME_MAP_OLD){
+				if (test == TEST_BIOME_MAP || test == TEST_BIOME_MAP_OLD || test == TEST_BIOME_GRID){
 					int offsetX = 0;
 					int offsetZ = 0;
 					TerrainData data = generator.getData(zoomFactor, x+offsetX, y+offsetZ);
@@ -177,22 +179,67 @@ public class Main extends JavaPlugin{
 						img.setRGB(x+size/2, y+size/2, data.type.color.getRGB());
 					float r = 0, g = 0, b = 0;
 					int i;
-					Pair<Integer, Float>[] values = generator.biomeGrid.getValue(x, y);
-					for (i = 0 ; i < values.length ; i++){
-						float mult = values[i].getSecond();
-						if (mult == 0)
-							break;
-						int index = values[i].getFirst();
-						Color c = generator.terrainTypes.get(index).color;
-						r += c.getRed()/256f;
-						g += c.getGreen()/256f;
-						b += c.getBlue()/256f;
-					}
-//					System.out.println(r+","+g+","+b);
-//					img.setRGB(x+size/2, y+size/2, new Color(r/(i+1), g/(i+1), b/(i+1)).getRGB());
-//					if (data.gradient > 0)
-//						img.setRGB(x+size/2, y+size/2, new Color((float)data.gradient,(float)data.gradient,(float)data.gradient).getRGB());
 					
+//					int x2 = x/16;
+//					int y2 = y/16;
+//					if (x < 0)
+//						x2--;
+//					if (y < 0)
+//						y2--;
+					
+//					Pair<Integer, Float>[] values = generator.biomeGrid.getValue((int)(x/IMG_ZOOM_FACTOR), (int)(y/IMG_ZOOM_FACTOR));
+//					for (i = 0 ; i < values.length ; i++){
+//						float mult = values[i].getSecond();
+//						if (mult == 0)
+//							break;
+//						int index = values[i].getFirst();
+//						Color c = generator.terrainTypes.get(index).color;
+////						if (mult > 0){
+//							r += c.getRed()*mult/256f;
+//							g += c.getGreen()*mult/256f;
+//							b += c.getBlue()*mult/256f;
+////						}
+////						System.out.println("value: "+values[i].getFirst()+" = "+values[i].getSecond());
+//					}
+					Pair<Integer, Float>[] values = generator.biomeGrid.getValue((int)(x/IMG_ZOOM_FACTOR), (int)(y/IMG_ZOOM_FACTOR));
+					float value = values[0].getSecond();
+					Color c = generator.terrainTypes.get(values[0].getFirst()).color;
+					r += value;
+					g += value;
+					b += value;
+//					r = 1-r;
+//					g = 1-g;
+//					b = 1-b;
+					
+//					Color c = generator.terrainTypes.get(generator.biomeGrid.getRawChunkValue(x2, y2)).color;
+//					r += c.getRed()/256f;
+//					g += c.getGreen()/256f;
+//					b += c.getBlue()/256f;
+					
+//					float[] values = generator.biomeGrid.getSmoothChunkValues(x2, y2);
+//					for (i = 0 ; i < values.length ; i++){
+//						float mult = values[i];
+//						if (mult > 0){
+//							Color c = generator.terrainTypes.get(i).color;
+//							r += c.getRed()*mult/256f;
+//							g += c.getGreen()*mult/256f;
+//							b += c.getBlue()*mult/256f;
+//						}
+//					}
+					
+					if (r > 1)
+						r = 1;
+					if (g > 1)
+						g = 1;
+					if (b > 1)
+						b = 1;
+					if (test == TEST_BIOME_GRID){
+//						System.out.println(r+","+g+","+b);
+						img.setRGB(x+size/2, y+size/2, new Color(r, g, b).getRGB());
+//						if (data.gradient > 0)
+//							img.setRGB(x+size/2, y+size/2, new Color((float)data.gradient,(float)data.gradient,(float)data.gradient).getRGB());
+//							img.setRGB(x+size/2, y+size/2, generator.terrainTypes.get(values[0].getFirst()).color.getRGB());
+					}
 					if (test == TEST_BIOME_MAP_OLD){
 						double f = data.properties[TerrainFeature.BASIC.ordinal()];
 						double t = data.properties[TerrainFeature.TEMPERATURE.ordinal()];
@@ -238,5 +285,10 @@ public class Main extends JavaPlugin{
 		if (value < lowerBorder)
 			return lowerBorder;
 		return value;
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		return CommandHandler.onCommand(sender, command, label, args);
 	}
 }
