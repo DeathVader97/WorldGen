@@ -75,7 +75,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 				biomes.setBiome(x-xOffset, z-zOffset, data.type.descriptor.representationBiome);
 				if (data.type.descriptor.modifier != null)
 					data.type.descriptor.modifier.onGeneration(data, x, z, xOffset, zOffset, result);
-				double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
+				double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC]);
 				int currentY = (int) terrainHeight;
 				for (int i = waterHeight ; i > (int)terrainHeight ; i--)
 					setBlock(result, x-xOffset, i, z-zOffset, (byte)Material.WATER.getId());
@@ -323,7 +323,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 						TerrainData data = map[x-offsetX][z-offsetZ];
 						if (data.type.descriptor.modifier != null)
 							data.type.descriptor.modifier.onPopulation(data, x, z, w);
-						double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
+						double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC]);
 						if (w.getBlockAt(x, (int)terrainHeight, z).getType() == Material.GRASS){
 							Block b = w.getBlockAt(x, (int)terrainHeight+1 , z);
 							b.setType(Material.LONG_GRASS);

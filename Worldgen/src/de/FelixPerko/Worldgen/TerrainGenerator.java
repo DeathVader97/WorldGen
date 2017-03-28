@@ -10,11 +10,11 @@ import de.FelixPerko.Worldgen.Utils.Pair;
 public abstract class TerrainGenerator {
 	public long seed;
 	public Random rand;
-	public OpenSimplexNoise baseNoise;
-	public OpenSimplexNoise temperatureNoise;
-	public OpenSimplexNoise humidityNoise;
-	public OpenSimplexNoise isleNoise;
-	public OpenSimplexNoise isleLineNoise;
+	public OpenSimplexNoise[] baseNoise;
+	public OpenSimplexNoise[] temperatureNoise;
+	public OpenSimplexNoise[] humidityNoise;
+	public OpenSimplexNoise[] isleNoise;
+	public OpenSimplexNoise[] isleLineNoise;
 	
 	public ArrayList<TerrainType> terrainTypes = new ArrayList<>();
 	public BiomeGrid biomeGrid = new BiomeGrid();
@@ -22,13 +22,22 @@ public abstract class TerrainGenerator {
 	public TerrainGenerator(long seed) {
 		this.seed = seed;
 		rand = new Random(seed);
-		baseNoise = new OpenSimplexNoise(rand.nextLong());
-		temperatureNoise = new OpenSimplexNoise(rand.nextLong());
-		humidityNoise = new OpenSimplexNoise(rand.nextLong());
-		isleNoise = new OpenSimplexNoise(rand.nextLong());
-		isleLineNoise = new OpenSimplexNoise(rand.nextLong());
+		baseNoise = generateNoises(rand,16);
+		baseNoise = generateNoises(rand,16);
+		temperatureNoise = generateNoises(rand,16);
+		humidityNoise = generateNoises(rand,16);
+		isleNoise = generateNoises(rand,16);
+		isleLineNoise = generateNoises(rand,16);
 	}
 	
+	private OpenSimplexNoise[] generateNoises(Random rand, int maxOctaves) {
+		OpenSimplexNoise[] arr = new OpenSimplexNoise[maxOctaves];
+		for (int i = 0; i < maxOctaves; i++) {
+			arr[i] = new OpenSimplexNoise(rand.nextLong());
+		}
+		return arr;
+	}
+
 	public abstract TerrainData getData(double zoomFactor, double x, double y);
 
 	public abstract TerrainData getChunkData(double zoomFactor, int x, int y);

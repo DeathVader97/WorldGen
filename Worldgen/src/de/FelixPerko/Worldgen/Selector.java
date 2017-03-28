@@ -10,7 +10,7 @@ public class Selector {
 	double[] conditionMax;
 	
 	public Selector() {
-		int size = TerrainFeature.values().length;
+		int size = TerrainFeature.count;
 		definiteMin = new double[size];
 		definiteMax = new double[size];
 		enabled = new boolean[size];
@@ -19,19 +19,17 @@ public class Selector {
 		conditionMax = new double[size];
 	}
 	
-	public Selector setFeature(TerrainFeature feature, double definiteMin, double definiteMax){
-		int i = feature.ordinal();
-		enabled[i] = true;
-		this.definiteMin[i] = definiteMin;
-		this.definiteMax[i] = definiteMax;
+	public Selector setFeature(int feature, double definiteMin, double definiteMax){
+		enabled[feature] = true;
+		this.definiteMin[feature] = definiteMin;
+		this.definiteMax[feature] = definiteMax;
 		return this;
 	}
 	
-	public Selector setCondition(TerrainFeature feature, double min, double max){
-		int i = feature.ordinal();
-		hasCondition[i] = true;
-		conditionMin[i] = min;
-		conditionMax[i] = max;
+	public Selector setCondition(int feature, double min, double max){
+		hasCondition[feature] = true;
+		conditionMin[feature] = min;
+		conditionMax[feature] = max;
 		return this;
 	}
 	
