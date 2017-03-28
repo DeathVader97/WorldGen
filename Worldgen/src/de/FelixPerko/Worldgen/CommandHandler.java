@@ -13,7 +13,9 @@ public class CommandHandler {
 
 	public static boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (command.getName().equalsIgnoreCase("getProperties")){
-			TerrainFeature[] features = TerrainFeature.values();
+			int[] features = new int[TerrainFeature.count];
+			for (int i = 0 ; i < features.length ; i++)
+				features[i] = i;
 			Location l = ((Player)sender).getLocation();
 			int chunkX = l.getChunk().getX();
 			int chunkZ = l.getChunk().getZ();
@@ -25,7 +27,7 @@ public class CommandHandler {
 //				inChunkZ += 16;
 			double[] properties = Main.chunkGenerator.data.get(new Pair<Integer, Integer>(chunkX,chunkZ))[inChunkX][inChunkZ].properties;
 			for (int i = 0 ; i < features.length ; i++){
-				sender.sendMessage(features[i].name()+": "+properties[i]);
+				sender.sendMessage(features[i]+": "+properties[i]);
 			}
 		}
 		else if (command.getName().equalsIgnoreCase("getBiome")){
@@ -34,7 +36,7 @@ public class CommandHandler {
 			for (Pair<Integer, Float> p : values){
 				if (p.getSecond() == 0)
 					break;
-				sender.sendMessage(Main.generator.terrainTypes.get(p.getFirst()).name()+": "+p.getSecond());
+				sender.sendMessage(Main.generator.terrainTypes.get(p.getFirst())+": "+p.getSecond());
 			}
 		}
 		return true;

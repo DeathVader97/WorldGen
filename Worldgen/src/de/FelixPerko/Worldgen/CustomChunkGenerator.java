@@ -51,7 +51,7 @@ public class CustomChunkGenerator extends ChunkGenerator{
 	
 	public final static double ZOOM_FACTOR = 0.05;
 	
-	public HashMap<Pair<Integer, Integer>,TerrainData[][]> data = new HashMap<>();
+	HashMap<Pair<Integer, Integer>,TerrainData[][]> data = new HashMap<>();
 	
     @Override
     public List<BlockPopulator> getDefaultPopulators(World world) {
@@ -73,24 +73,9 @@ public class CustomChunkGenerator extends ChunkGenerator{
 				TerrainData data = Main.generator.getData(ZOOM_FACTOR, x, z);
 				dataMap[x-xOffset][z-zOffset] = data;
 				biomes.setBiome(x-xOffset, z-zOffset, data.type.descriptor.representationBiome);
-<<<<<<< HEAD
 				if (data.type.descriptor.modifier != null)
 					data.type.descriptor.modifier.onGeneration(data, x, z, xOffset, zOffset, result);
 				double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC]);
-=======
-				
-				Pair<Integer, Float>[] values = Main.generator.biomeGrid.getValue((int)(x), (int)(z));
-				for (Pair<Integer, Float> pair : values){
-					if (pair.getSecond() <= 0)
-						break;
-					if (Main.generator.terrainTypes.get(pair.getFirst()).descriptor.modifier != null)
-						Main.generator.terrainTypes.get(pair.getFirst()).descriptor.modifier.onGeneration(data, x, z, xOffset, zOffset, pair.getSecond(), result);
-				}
-				
-//				if (data.type.descriptor.modifier != null)
-//					data.type.descriptor.modifier.onGeneration(data, x, z, xOffset, zOffset, result);
-				double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC.ordinal()]);
->>>>>>> branch 'master' of https://github.com/DeathVader97/WorldGen.git
 				int currentY = (int) terrainHeight;
 				for (int i = waterHeight ; i > (int)terrainHeight ; i--)
 					setBlock(result, x-xOffset, i, z-zOffset, (byte)Material.WATER.getId());
@@ -338,28 +323,12 @@ public class CustomChunkGenerator extends ChunkGenerator{
 						TerrainData data = map[x-offsetX][z-offsetZ];
 						if (data.type.descriptor.modifier != null)
 							data.type.descriptor.modifier.onPopulation(data, x, z, w);
-<<<<<<< HEAD
 						double terrainHeight = heightModifier.modify(data.properties[TerrainFeature.BASIC]);
 						if (w.getBlockAt(x, (int)terrainHeight, z).getType() == Material.GRASS){
 							Block b = w.getBlockAt(x, (int)terrainHeight+1 , z);
 							b.setType(Material.LONG_GRASS);
 							b.setData((byte) 1);
-=======
-						double terrainHeight = heightModifier.modify(data.getProperty(TerrainFeature.BASIC));
-						
-						if (terrainHeight > 64){
-							for (DensityBasedBlock b : Main.generator.densityBasedBlocks){
-								if (b.process(w, x, (int)terrainHeight+1, z, data.properties))
-									break;
-							}
->>>>>>> branch 'master' of https://github.com/DeathVader97/WorldGen.git
 						}
-						
-//						if (w.getBlockAt(x, (int)terrainHeight, z).getType() == Material.GRASS){
-//							Block b = w.getBlockAt(x, (int)terrainHeight+1 , z);
-//							b.setType(Material.LONG_GRASS);
-//							b.setData((byte) 1);
-//						}
 					}
 				}
 			}

@@ -9,29 +9,33 @@ import org.bukkit.block.Block;
 import de.FelixPerko.Worldgen.Utils.Pair;
 
 /**
- * populates blocks based on a density value calculated by terrain properties via modifiers.
- * no clumping occurs since random numbers are used to determine the value.
+ * populates blocks based on a density value calculated by terrain properties
+ * via modifiers. no clumping occurs since random numbers are used to determine
+ * the value.
  */
 
 public class DensityBasedBlock {
-	
+
 	int id;
 	byte data;
 	Modifier[] modifiers;
 	int requiredTypeBeneath;
-	
-	public DensityBasedBlock(int id, byte data, int requiredTypeBeneath, ArrayList<Pair<TerrainFeature, Modifier>> modifiers){
+
+	public DensityBasedBlock(int id, byte data, int requiredTypeBeneath,
+			ArrayList<Pair<Integer, Modifier>> modifiers) {
 		this.id = id;
 		this.data = data;
-		this.requiredTypeBeneath  = requiredTypeBeneath;
-		this.modifiers = new Modifier[TerrainFeature.values().length];
-		for (Pair<TerrainFeature, Modifier> pair : modifiers){
-			this.modifiers[pair.getFirst().ordinal()] = pair.getSecond();
+		this.requiredTypeBeneath = requiredTypeBeneath;
+		this.modifiers = new Modifier[TerrainFeature.count];
+		for (Pair<Integer, Modifier> pair : modifiers) {
+			this.modifiers[pair.getFirst()] = pair.getSecond();
 		}
 	}
-	
+
 	/**
-	 * Sets the block at the given Location if a random number exceeds the calculated density based on terrain properties
+	 * Sets the block at the given Location if a random number exceeds the
+	 * calculated density based on terrain properties
+	 * 
 	 * @param w
 	 * @param x
 	 * @param y
@@ -39,13 +43,13 @@ public class DensityBasedBlock {
 	 * @param properties
 	 * @return if block was set
 	 */
-	public boolean process(World w, int x, int y, int z, double[] properties){
+	public boolean process(World w, int x, int y, int z, double[] properties) {
 		Block b = w.getBlockAt(x, y, z);
-		Block bBeneath = w.getBlockAt(x, y-1, z);
+		Block bBeneath = w.getBlockAt(x, y - 1, z);
 		if (requiredTypeBeneath > 0 && requiredTypeBeneath != bBeneath.getTypeId())
 			return false;
 		double density = 1;
-		for (int i = 0 ; i < modifiers.length ; i++){
+		for (int i = 0; i < modifiers.length; i++) {
 			if (modifiers[i] == null)
 				continue;
 			density *= modifiers[i].modify(properties[i]);

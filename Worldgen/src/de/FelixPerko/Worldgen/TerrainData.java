@@ -16,8 +16,4 @@ public class TerrainData {
 		}
 		this.properties = properties;
 	}
-	
-	public double getProperty(TerrainFeature feature){
-		return properties[feature.ordinal()];
-	}
 }

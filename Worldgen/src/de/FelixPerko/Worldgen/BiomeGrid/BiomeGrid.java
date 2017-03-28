@@ -6,23 +6,17 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
-import org.bukkit.World;
-
 import de.FelixPerko.Worldgen.CustomChunkGenerator;
 import de.FelixPerko.Worldgen.Main;
 import de.FelixPerko.Worldgen.Utils.Pair;
 
 public class BiomeGrid {
 	int size = 10;
-	int smoothRad = 3;
+	int smoothRad = 2;
 	HashMap<Pair<Integer, Integer>, Integer> map = new HashMap<>();
 	HashMap<Pair<Integer, Integer>, float[]> smoothMap = new HashMap<>();
 	
-	public float[] getSmoothChunkValues(int x, int y){
-		if (x < 0)
-			x--;
-		if (y < 0)
-			y--;
+	private float[] getSmoothChunkValues(int x, int y){
 		float[] v = smoothMap.get(new Pair<Integer, Integer>(x, y));
 		if (v == null){
 			v = generateSmoothChunkValues(x,y,smoothRad);
@@ -31,11 +25,7 @@ public class BiomeGrid {
 		return v;
 	}
 	
-	public Integer getRawChunkValue(int x, int y) {
-		if (x < 0)
-			x--;
-		if (y < 0)
-			y--;
+	private Integer getRawChunkValue(int x, int y) {
 		Integer v = map.get(new Pair<Integer, Integer>(x, y));
 		if (v == null){
 			v = generateRawChunkValue(x,y);
@@ -91,22 +81,10 @@ public class BiomeGrid {
 	public Pair<Integer,Float>[] getValue(int blockX, int blockZ) {
 		double x = blockX/16.0;
 		double y = blockZ/16.0;
-		boolean negativeX = x < 0;
-		boolean negativeY = y < 0;
-		if (x < 0)
-			x--;
-		if (y < 0)
-			y--;
 		int ix = (int)x;
 		int iy = (int)y;
 		float dx = (float)x-ix;
 		float dy = (float)y-iy;
-		if (negativeX)
-			dx = 1+dx;
-		if (negativeY)
-			dy = 1+dy;
-		
-//		System.out.println("ix="+ix+" iy="+iy+" dx="+dx+" dy="+dy);
 		
 		float[] v1 = getSmoothChunkValues(ix, iy);
 		float[] v2 = getSmoothChunkValues(ix+1, iy);
@@ -134,9 +112,9 @@ public class BiomeGrid {
 			@Override
 			public int compare(Pair<Integer, Float> o1, Pair<Integer, Float> o2) {
 				if (o1.getSecond() < o2.getSecond())
-					return 1;
-				if (o1.getSecond() > o2.getSecond())
 					return -1;
+				if (o1.getSecond() > o2.getSecond())
+					return 1;
 				return 0;
 			}
 		});

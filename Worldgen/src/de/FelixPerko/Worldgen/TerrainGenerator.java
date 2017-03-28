@@ -17,7 +17,6 @@ public abstract class TerrainGenerator {
 	public OpenSimplexNoise[] isleLineNoise;
 	
 	public ArrayList<TerrainType> terrainTypes = new ArrayList<>();
-	public ArrayList<DensityBasedBlock> densityBasedBlocks = new ArrayList<>();
 	public BiomeGrid biomeGrid = new BiomeGrid();
 	
 	public TerrainGenerator(long seed) {
